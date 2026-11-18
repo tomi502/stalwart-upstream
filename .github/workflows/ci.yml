@@ -535,7 +535,7 @@ jobs:
         with:
           inputs: |
             archive/**/*.tar.gz
-            archive/**/*.zip
+          #   archive/**/*.zip
 
       - name: Build release body
         run: |
