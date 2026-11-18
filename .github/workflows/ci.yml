@@ -42,7 +42,8 @@ jobs:
       attestations: write
       packages: write
     needs: [linux, windows, macos, freebsd]
-    if: github.event_name == 'push' || inputs.Docker
+    # if: github.event_name == 'push' || inputs.Docker
+    if: ${{ false }} # Multiarch requires targets disabled in this variant.
     steps:
       - name: Install Cosign
         uses: sigstore/cosign-installer@v4.1.2
@@ -119,41 +120,41 @@ jobs:
             platform: linux/amd64
             suffix: ""
             build_env: ""
-          - target: x86_64-unknown-linux-musl
-            runner: ubuntu-latest
-            platform: linux/amd64
-            suffix: "-alpine"
-            build_env: ""
-          - target: aarch64-unknown-linux-gnu
-            runner: ubuntu-24.04-arm
-            platform: linux/arm64
-            suffix: ""
-            build_env: "JEMALLOC_SYS_WITH_LG_PAGE=16 "
-          - target: aarch64-unknown-linux-musl
-            runner: ubuntu-24.04-arm
-            platform: linux/arm64
-            suffix: "-alpine"
-            build_env: "JEMALLOC_SYS_WITH_LG_PAGE=16 "
-          - target: armv7-unknown-linux-gnueabihf
-            runner: ubuntu-latest
-            platform: linux/arm/v7
-            suffix: ""
-            build_env: "JEMALLOC_SYS_WITH_LG_PAGE=16 "
-          - target: armv7-unknown-linux-musleabihf
-            runner: ubuntu-latest
-            platform: linux/arm/v7
-            suffix: "-alpine"
-            build_env: "JEMALLOC_SYS_WITH_LG_PAGE=16 "
-          - target: arm-unknown-linux-gnueabihf
-            runner: ubuntu-latest
-            platform: linux/arm/v6
-            suffix: ""
-            build_env: ""
-          - target: arm-unknown-linux-musleabihf
-            runner: ubuntu-latest
-            platform: linux/arm/v6
-            suffix: "-alpine"
-            build_env: ""
+          # - target: x86_64-unknown-linux-musl
+            # runner: ubuntu-latest
+            # platform: linux/amd64
+            # suffix: "-alpine"
+            # build_env: ""
+          # - target: aarch64-unknown-linux-gnu
+            # runner: ubuntu-24.04-arm
+            # platform: linux/arm64
+            # suffix: ""
+            # build_env: "JEMALLOC_SYS_WITH_LG_PAGE=16 "
+          # - target: aarch64-unknown-linux-musl
+            # runner: ubuntu-24.04-arm
+            # platform: linux/arm64
+            # suffix: "-alpine"
+            # build_env: "JEMALLOC_SYS_WITH_LG_PAGE=16 "
+          # - target: armv7-unknown-linux-gnueabihf
+            # runner: ubuntu-latest
+            # platform: linux/arm/v7
+            # suffix: ""
+            # build_env: "JEMALLOC_SYS_WITH_LG_PAGE=16 "
+          # - target: armv7-unknown-linux-musleabihf
+            # runner: ubuntu-latest
+            # platform: linux/arm/v7
+            # suffix: "-alpine"
+            # build_env: "JEMALLOC_SYS_WITH_LG_PAGE=16 "
+          # - target: arm-unknown-linux-gnueabihf
+            # runner: ubuntu-latest
+            # platform: linux/arm/v6
+            # suffix: ""
+            # build_env: ""
+          # - target: arm-unknown-linux-musleabihf
+            # runner: ubuntu-latest
+            # platform: linux/arm/v6
+            # suffix: "-alpine"
+            # build_env: ""
     name: Build / ${{matrix.target}}
     runs-on: ${{matrix.runner}}
     timeout-minutes: 180
@@ -337,6 +338,7 @@ jobs:
           retention-days: 1
 
   windows:
+    if: ${{ false }} # Keep this upstream job disabled for the GNU-only build.
     name: Build / ${{matrix.target}}
     runs-on: windows-latest
     strategy:
@@ -369,6 +371,7 @@ jobs:
           path: artifacts
 
   macos:
+    if: ${{ false }} # Keep this upstream job disabled for the GNU-only build.
     name: Build / ${{matrix.target}}
     runs-on: macos-latest
     strategy:
@@ -414,6 +417,7 @@ jobs:
           path: artifacts
 
   freebsd:
+    if: ${{ false }} # Keep this upstream job disabled for the GNU-only build.
     name: Build / ${{matrix.target}}
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -476,7 +480,8 @@ jobs:
       contents: write
       attestations: write
     if: github.event_name == 'push' || inputs.Release
-    needs: [linux, windows, macos, freebsd]
+    # needs: [linux, windows, macos, freebsd]
+    needs: [linux]
     runs-on: ubuntu-latest
     steps:
       # Must run before artifacts are downloaded — checkout cleans the workspace.
@@ -562,7 +567,8 @@ jobs:
 
   publish:
     name: Publish release
-    needs: [linux, windows, macos, freebsd, multiarch, release]
+    # needs: [linux, windows, macos, freebsd, multiarch, release]
+    needs: [linux, release]
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     permissions:
@@ -575,7 +581,8 @@ jobs:
 
   cleanup:
     name: Cleanup failed release
-    needs: [linux, windows, macos, freebsd, multiarch, release]
+    # needs: [linux, windows, macos, freebsd, multiarch, release]
+    needs: [linux, release]
     if: failure() && startsWith(github.ref, 'refs/tags/') && github.run_attempt >= 3
     runs-on: ubuntu-latest
     permissions:
