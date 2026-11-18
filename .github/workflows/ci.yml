@@ -492,7 +492,8 @@ jobs:
       - name: Download Artifacts
         uses: actions/download-artifact@v8
         with:
-          path: archive
+          # path: archive
+          path: archive/artifact-x86_64-unknown-linux-gnu
           pattern: artifact-*
 
       - name: Compress
